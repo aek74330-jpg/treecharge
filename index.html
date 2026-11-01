@@ -54,8 +54,10 @@
 <script src="config.js"></script>
 <script>
   // the app itself runs on Google Apps Script; this page only shows it full screen with our own icon
-  var page = '';
   var q = new URLSearchParams(location.search);
+  // ?page=admin / ?page=partner opens the staff pages from this same file (works even without admin.html)
+  var page = (/^(admin|partner)$/.test(q.get('page') || '') ? q.get('page') : '');
+  if (page) document.title = 'TREE CHARGE ' + (page === 'admin' ? 'Admin' : 'Partner');
   var url = APP_URL + (page ? '?page=' + page : '') + (q.get('c') ? (page ? '&' : '?') + 'c=' + encodeURIComponent(q.get('c')) : '');
   var f = document.getElementById('app'), s = document.getElementById('splash');
   f.addEventListener('load', function () { setTimeout(function () { s.classList.add('hide'); }, 600); });
@@ -69,6 +71,7 @@
     var d = e.data || {};
     if (d.tc === 'hello') { appWin = e.source; try { appWin.postMessage({ tc: 'wrapper' }, '*'); } catch (x) {} }
     if (d.tc === 'scan') { appWin = e.source; openScan(d.lang); }
+    if (d.tc === 'go' && /^(admin|partner|)$/.test(d.page || '')) { location.href = location.pathname + (d.page ? '?page=' + d.page : ''); }
   });
   function send(m) { try { appWin && appWin.postMessage(m, '*'); } catch (x) {} }
   function closeScan() { clearInterval(timer); if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; document.getElementById('scan').classList.remove('on'); }
